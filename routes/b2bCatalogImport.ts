@@ -17,6 +17,11 @@ export function b2bCatalogImport () {
       next(new Error('Catalogue exceeds the 64 KB limit'))
       return
     }
+    if (/<!(DOCTYPE|ENTITY)/i.test(xml)) {
+      res.status(400)
+      next(new Error('Catalogue must not declare a DTD or entities'))
+      return
+    }
     try {
       const doc = XmlDocument.fromString(xml, { option: ParseOption.XML_PARSE_NONET | ParseOption.XML_PARSE_NOBLANKS })
       const items = doc.root.find('//item').map((node: any) => ({
