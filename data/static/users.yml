@@ -290,3 +290,11 @@
   securityQuestion:
     id: 14
     answer: 'English Riviera'
+-
+  email: support@juice-sh.op
+  password: 'Support2026!'
+  key: support
+  role: 'admin'
+  securityQuestion:
+    id: 1
+    answer: 'support'
