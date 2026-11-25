@@ -759,11 +759,17 @@ const Metrics = metrics.observeMetrics() // vuln-code-snippet neutral-line expos
 app.get('/metrics', utils.asyncHandler(metrics.serveMetrics())) // vuln-code-snippet vuln-line exposedMetricsChallenge
 errorhandler.title = `${config.get<string>('application.name')} (Express ${utils.version('express')})`
 
+async function prepareDatabase (seq: typeof sequelize) {
+  await seq.sync()
+  if (await UserModel.count() === 0) {
+    await datacreator()
+  }
+}
+
 export async function start (readyCallback?: () => void) {
   const datacreatorEnd = startupGauge.startTimer({ task: 'datacreator' })
-  await sequelize.sync({ force: true })
   await preconditionsReady
-  await datacreator()
+  await prepareDatabase(sequelize)
   datacreatorEnd()
   const port = process.env.PORT ?? config.get('server.port')
   process.env.BASE_PATH = process.env.BASE_PATH ?? config.get('server.basePath')
@@ -812,8 +818,7 @@ export async function createApp (options?: { inMemoryDb?: boolean }) {
   testApp.set('view engine', 'hbs')
   await restoreOverwrittenFilesWithOriginals()
   configureApp(testApp, seq)
-  await seq.sync({ force: true })
-  await datacreator()
+  await prepareDatabase(seq)
   return { app: testApp, sequelize: seq }
 }
 
